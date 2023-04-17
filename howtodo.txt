@@ -1,5 +1,5 @@
 get training data ->
-train with neural network ->
+train with neural network -> (use pytorch)
 get user input ->
 process user data ->
 generate output based on network
