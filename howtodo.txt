@@ -1,0 +1,5 @@
+get training data ->
+train with neural network ->
+get user input ->
+process user data ->
+generate output based on network
