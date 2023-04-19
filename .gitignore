@@ -127,6 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-Answers.csv
-Questions.csv
-Tags.csv
+*.npz
+*.csv

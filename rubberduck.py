@@ -20,7 +20,7 @@ labels = questionsDataFrame.iloc[:, 0].astype(str).tolist()
 
 categories = set(labels)
 
-print("Loading questions took ", time.time() - startTime, "seconds")
+print("Loading questions took", time.time() - startTime, "seconds")
 startTime = time.time()
 
 if not exists("tokenizedQuestions.npz"):
@@ -49,7 +49,7 @@ else:
     length = paddedSequences.shape[1]
 
 
-print("Tokenizing took", time.time() - startTime)
+print("Tokenizing took", time.time() - startTime, "seconds")
 startTime = time.time()
 
 print("Loading tags...")
@@ -58,7 +58,7 @@ tagsDataframe = pd.read_csv("Tags.csv")
 tagList = tagsDataframe['Tag'].str.split().tolist() 
 
 if not exists("tokenizedTags.npz"):
-    print("Tokenizing tags")
+    print("Tokenizing tags...")
     # tokenizing tags
     tagTokenizer = tf.keras.preprocessing.text.Tokenizer()
     tagTokenizer.fit_on_texts([str(tag) for tag in tagList])
@@ -81,8 +81,8 @@ else:
     tagLength = paddedTagSequences.shape[1]
 
 
-print("Tag loading took ", time.time() - startTime)
-print("Total initialization took ", time.time() - totalTime)
+print("Tag loading took ", time.time() - startTime, "seconds")
+print("Total preprocessing took ", time.time() - totalTime, "seconds")
 
 if exists("rubbermodel.h5"):
     print("Loading model...")
@@ -117,7 +117,8 @@ else:
     model.fit(x=np.array([np.array(paddedSequences), np.array(paddedTagSequences)]), y=labels, batch_size=32, epochs=10)
     model.save("rubbermodel.h5")
     
-
+print("Model trained")
+print("Total time took", time.time() - totalTime, "seconds")
 exit()
 def classifyQuestion(query, tokenizer, tagTokenizer, length, categories, model):
     # process it
