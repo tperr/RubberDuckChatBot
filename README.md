@@ -1,5 +1,6 @@
 # RubberDuckChatBot
 Rubber duck chat bot for CS4811 Intro to AI
+
 Training data comes from the following website:
 https://huggingface.co/datasets/koutch/stackoverflow_python
 make sure to download the zip archive and unzip it in the same path as rubberduck.py
