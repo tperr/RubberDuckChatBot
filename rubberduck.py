@@ -8,7 +8,6 @@ from os.path import exists
 import time
 import json
 
-tf.device('/GPU:0')
 
 totalTime = time.time()
 
@@ -68,7 +67,10 @@ else:
 
     outputLayer = Dense(len(categories), activation="softmax")(poolingLayer)
     model = Model(inputs=inputLayer, outputs=outputLayer)
-    model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+    with tf.device('/GPU:0'):
+
+        model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
     # convert labels to integers
     labelEncoder = {category: i for i, category in enumerate(categories)}
@@ -83,7 +85,9 @@ else:
     
     # train model, increase batch size if you want
     print("Fitting model...")
-    model.fit(x=paddedSequences, y=labels, epochs=10, batch_size=32)
+    with tf.device('/GPU:0'):
+        model.fit(x=x, y=y, epochs=10, batch_size=32)
+
     model.save("rubbermodel.h5")
     
 print("Model trained")
