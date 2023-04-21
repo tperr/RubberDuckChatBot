@@ -10,8 +10,8 @@ numpy
 pandas
 tensorflow
 
-Preprocessing takes some time to load (\~250 seconds when nothing has been tokenized so far and \~225 seconds when they already are and inside of their respective .npz files)
-Fitting the model takes about \~(TBD), and loading an already trained model takes \~(TBD)
+Preprocessing takes some time to load (\~520)
+Fitting the model takes time to load too (\~36000 seconds (\~10 hours) untrained but its a near instant load when the rubbermodel.h5 file is there)
 
 These numbers are from a computer with 16GB of ram and I believe not using a graphics card
 There are also issues with training the model with ^^
