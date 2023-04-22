@@ -1,14 +1,23 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import csv
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Embedding, Conv1D, GlobalMaxPooling1D, Dense, Concatenate, Flatten, Reshape
+from tensorflow.keras.layers import Input, Embedding, Conv1D, GlobalMaxPooling1D, Dense
 from tensorflow.keras.models import Model, load_model
 from os.path import exists
 import time
-import math
 import json
 from bs4 import BeautifulSoup
+
+"""
+Division of labor:
+Tim Perr: get_model, html removing
+Ransom Duncan: load_questions, load_answers
+Josh Farr: get_tokenizer, anything not in functions
+Quentin Ross: get_answer, classify_question, training the model
+"""
 
 # loads questions from specified filename, usually "Questions.csv"
 def load_questions(filename):
