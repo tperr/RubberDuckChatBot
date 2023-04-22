@@ -16,15 +16,15 @@ Division of labor:
 Tim Perr: get_model, html removing
 Ransom Duncan: load_questions, load_answers
 Josh Farr: get_tokenizer, anything not in functions
-Quentin Ross: get_answer, classify_question, training the model
+Quentin Ross: classify_question, training the model
 """
 
 # loads questions from specified filename, usually "Questions.csv"
 def load_questions(filename):
     questions_df = pd.read_csv(filename, encoding="iso-8859-1")  # why will UTF-8 not work??????
     questions_df = questions_df.iloc[:, [0, 1, 2, 3, 4, 5]]
-    data = questions_df["Title"].values.tolist()
-    data = [BeautifulSoup(value, "html.parser").get_text() for value in data]
+    data = questions_df[["Title", "Body"]].values.tolist()
+    data = [value for value in data]
     labels = questions_df.iloc[:, 0].astype(str).tolist()
 
     categories = set(labels)
@@ -37,8 +37,8 @@ def get_tokenizer(data, filename):
         # tokenize data
         print("Tokenizing questions...")
         tokenizer = tf.keras.preprocessing.text.Tokenizer()
-        tokenizer.fit_on_texts(row for row in data)
-        sequences = tokenizer.texts_to_sequences(row for row in data)
+        tokenizer.fit_on_texts(row[0] + " " + row[1] for row in data)
+        sequences = tokenizer.texts_to_sequences(row[0] + " " + row[1] for row in data)
         length = max([len(seq) for seq in sequences])
         padded_sequences = tf.keras.preprocessing.sequence.pad_sequences(sequences, maxlen=length)
 
@@ -124,33 +124,23 @@ def get_model(input_length, tokenizer, categories, sequences):
             model.save("rubbermodel.h5")
 
 
-# gets answer based off the category
-def get_answer(category, answers):
-    
-    #TODO make this so it takes all the categories and gets the answer with the most categories
-    relevant_answers = [answer for answer in answers if category.lower() in answer.lower()]
+# classifies question
+def classify_question(query, tokenizer, length, categories, model, answers):
+    # process it
+    query_sequence = tokenizer.texts_to_sequences([query])
+    query_padded = tf.keras.preprocessing.sequence.pad_sequences(query_sequence, maxlen=6414)
+
+    # classify it
+    category_idx = np.argmax(model.predict(query_padded))
+    category = list(categories)[category_idx]
+    print(category)
+
+    relevant_answers = [answer for answer in answers if category.lower() in tokenizer.texts_to_sequences([answer.lower()])]
     if relevant_answers:
         return relevant_answers[0]
     else:
         return "Sorry, I don't know the answer to that question."
-
-
-# classifies question
-def classify_question(query, tokenizer, length, categories, model, answers):
-    print("Classifying Question: '", query + "'")
-    # process query
-    query_sequence = tokenizer.texts_to_sequences([query])
-    query_padded = tf.keras.preprocessing.sequence.pad_sequences(query_sequence, maxlen=length)
-
-    # classify query
-    category_idx = np.argmax(model.predict(query_padded))
-    category = list(categories)[category_idx]
-
-    # get relevant answer
-    answer = get_answer(category, answers)
-
-    return answer
-
+    
 
 totalTime = time.time()
 
@@ -162,8 +152,8 @@ data, categories = load_questions("Questions.csv")
 print("Loading questions took", time.time() - startTime, "seconds")
 startTime = time.time()
 
-tokenizer, paddedSequences, length = get_tokenizer(data, "tokenized_questions.npz")
-
+tokenizer, padded_sequences, length = get_tokenizer(data, "tokenized_questions.npz")
+print(length)
 print("Tokenizing took", time.time() - startTime, "seconds")
 startTime = time.time()
 
@@ -171,12 +161,13 @@ answers = load_answers("Answers.csv")
 
 print("Loading answers took", time.time() - startTime, "seconds")
 
+
 print("Total preprocessing took ", time.time() - totalTime, "seconds")
-model = get_model(length, tokenizer, categories, paddedSequences)
+model = get_model(length, tokenizer, categories, padded_sequences)
 print("Total time took", time.time() - totalTime, "seconds")
 
 question = input("Enter a question: ")
 # test it
 while question != "quit":
     print(classify_question(question, tokenizer, length, categories, model, answers))
-    question = input("Enter a question: ")
+    question = input("Enter a question: ").lower()
